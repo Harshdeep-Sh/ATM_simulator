@@ -5,15 +5,28 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.*;
 
 public class SignUpOne extends JFrame implements ActionListener{
+
+    public static boolean isValidEmail(String email) {
+        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(email);
+
+        return matcher.matches();
+    }
+
+
     long random;
     JTextField nameTextField,fnameTextField,eMailTextField,addressTextField,cityTextField,stateTextField,pinCodeTextField;
     JButton next;
     JDateChooser dateChooser;
     JRadioButton maleButton,femaleButton,otherButton,marriedButton,unmarriedButton;
     SignUpOne(){ 
+        setTitle("New Account Application Form - Page: 1");
         Random rn = new Random();
         long random = Math.abs((rn.nextLong()%9000L) + 1000L);
         JLabel formNo = new JLabel("Application Form No. "+ random);
@@ -32,7 +45,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         PersonalDet.setBounds(290,80,400,30);
         add(PersonalDet);
 
-        JLabel name = new JLabel("Name:");
+        JLabel name = new JLabel("Name*:");
         name.setFont(new Font("Railway",Font.BOLD,20));
         name.setBounds(100,140,100,30);
         add(name);
@@ -42,7 +55,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         nameTextField.setBounds(300,140,400,30);
         add(nameTextField);
 
-        JLabel fName = new JLabel("Father's Name:");
+        JLabel fName = new JLabel("Father's Name*:");
         fName.setFont(new Font("Railway",Font.BOLD,20));
         fName.setBounds(100,190,200,30);
         add(fName);
@@ -52,7 +65,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         fnameTextField.setBounds(300,190,400,30);
         add(fnameTextField);
 
-        JLabel DOB = new JLabel("Date of Birth: ");
+        JLabel DOB = new JLabel("Date of Birth*: ");
         DOB.setFont(new Font("Railway",Font.BOLD,20));
         DOB.setBounds(100,240,200,30);
         add(DOB);
@@ -61,7 +74,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         dateChooser.setBounds(300,240,400,30);
         add(dateChooser);
 
-        JLabel Gender = new JLabel("Gender");
+        JLabel Gender = new JLabel("Gender*");
         Gender.setFont(new Font("Railway",Font.BOLD,20));
         Gender.setBounds(100,290,200,30);
         add(Gender);
@@ -85,7 +98,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         genderButtonGroup.add(maleButton);
         genderButtonGroup.add(femaleButton);
 
-        JLabel eMail = new JLabel("E-Mail Address: ");
+        JLabel eMail = new JLabel("E-Mail Address*: ");
         eMail.setFont(new Font("Railway",Font.BOLD,20));
         eMail.setBounds(100,340,200,30);
         add(eMail);
@@ -95,7 +108,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         eMailTextField.setBounds(300,340,400,30);
         add(eMailTextField);
 
-        JLabel marital = new JLabel("Marital Status: ");
+        JLabel marital = new JLabel("Marital Status*: ");
         marital.setFont(new Font("Railway",Font.BOLD,20));
         marital.setBounds(100,390,200,30);
         add(marital);
@@ -114,7 +127,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         maritalButtonGroup.add(marriedButton);
         maritalButtonGroup.add(unmarriedButton);
 
-        JLabel address = new JLabel("Address: ");
+        JLabel address = new JLabel("Address*: ");
         address.setFont(new Font("Railway",Font.BOLD,20));
         address.setBounds(100,440,200,30);
         add(address);
@@ -124,7 +137,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         addressTextField.setBounds(300,440,400,30);
         add(addressTextField);
 
-        JLabel city = new JLabel("City: ");
+        JLabel city = new JLabel("City*: ");
         city.setFont(new Font("Railway",Font.BOLD,20));
         city.setBounds(100,490,200,30);
         add(city);
@@ -134,7 +147,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         cityTextField.setBounds(300,490,400,30);
         add(cityTextField);
 
-        JLabel state = new JLabel("State: ");
+        JLabel state = new JLabel("State*: ");
         state.setFont(new Font("Railway",Font.BOLD,20));
         state.setBounds(100,540,200,30);
         add(state);
@@ -144,7 +157,7 @@ public class SignUpOne extends JFrame implements ActionListener{
         stateTextField.setBounds(300,540,400,30);
         add(stateTextField);
 
-        JLabel pinCode = new JLabel("PIN Code: ");
+        JLabel pinCode = new JLabel("PIN Code*: ");
         pinCode.setFont(new Font("Railway",Font.BOLD,20));
         pinCode.setBounds(100,590,200,30);
         add(pinCode);
@@ -201,9 +214,6 @@ public class SignUpOne extends JFrame implements ActionListener{
             else if(dob.equals("")){
                 JOptionPane.showMessageDialog(null, "Date of Birth is Required");
             }
-            else if(dob.equals("")){
-                JOptionPane.showMessageDialog(null, "Date of Birth is Required");
-            }
             else if(gender.equals("")){
                 JOptionPane.showMessageDialog(null, "Gender is Required");
             }
@@ -226,9 +236,20 @@ public class SignUpOne extends JFrame implements ActionListener{
                 JOptionPane.showMessageDialog(null, "PIN Code is Required");
             }
             else{
+                if(!isValidEmail(email)){
+                    JOptionPane.showMessageDialog(null, "Enter valid E-Mail");
+                }
+                else if(!pin.matches("\\d+")){
+                    JOptionPane.showMessageDialog(null, "Enter valid PIN Code");
+                }
                 // SQL injection vulnerable!!!!!!!!!!!!!!!
-                conn c = new conn();
-                String query = "insert into signup values()";
+                else if (isValidEmail(email) && pin.matches("\\d+")){
+                    conn c = new conn();
+                    String query = "insert into signup values('"+formno+"','" +name+"','" +fName+"','" +dob+"','" +gender+"','" +email+"','"  +marital+"','"  +address+"','" +city+"','" +pin+"','" +state+"')";
+                    c.s.executeUpdate(query);
+                    setVisible(false);
+                    new SignUpTwo(formno);
+                }
             }
         }
         catch(Exception e){
